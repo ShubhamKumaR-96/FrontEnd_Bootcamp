@@ -120,9 +120,16 @@ p {
 .five_day_foreacst_container .day_wise_forecast .min-temp{
   opacity: 50%;
 }
+.five_day_foreacst_container .day_wise_forecast .max-temp{
+  justify-self: end;
+}
 .five_day_foreacst_container .day_wise_forecast .icon{
   width: 75px;
   height: 75px;
+}
+.five_day_foreacst_container .day_wise_forecast .day {
+  text-transform: capitalize;
+  justify-self: start;
 }
 
 /* Style for feels like */

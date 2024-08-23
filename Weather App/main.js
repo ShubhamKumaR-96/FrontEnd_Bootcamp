@@ -1,5 +1,7 @@
 const API_KEY = "368665fea866d4db85bf761cba291c9e";
 
+const DAYS_OF_WEEK = ["sun", "mon", "tue", "wed", "thu", "fri", "sun"];
+
 const getCurrentWeatherData = async () => {
   const city = "chandigarh";
   const response = await fetch(
@@ -46,15 +48,25 @@ const loadCurrentForecast = ({
   )}`;
 };
 
-const loadHourlyForecast = (hourlyForecast) => {
+const loadHourlyForecast = ({main:{temp:tempNow},weather:[{icon:iconNow}]},hourlyForecast) => {
   console.log(hourlyForecast);
-  let dataFor12Hours = hourlyForecast.slice(1, 13);
+   
+  const timeForMatter=Intl.DateTimeFormat("en",{
+    hour12:true,hour:"numeric"
+  })
+
+
+  let dataFor12Hours = hourlyForecast.slice(2, 14);
   const hourlyContainer = document.querySelector(".hourly-container");
-  let innerHTMLString = ``;
+  let innerHTMLString = `<article>
+          <h3 class="time">Now</h3>
+          <img class="icon" src="${createIconUrl(iconNow)}" alt="icon">
+          <p class="hourly-temp">${formatTemperature(tempNow)}</p>
+        </article>`
 
   for (let { temp, icon, dt_txt } of dataFor12Hours) {
     innerHTMLString += `<article>
-          <h3 class="time">${dt_txt.split(" ")[1]}</h3>
+          <h3 class="time">${timeForMatter.format(new Date(dt_txt))}</h3>
           <img class="icon" src="${createIconUrl(icon)}" alt="icon">
           <p class="hourly-temp">${formatTemperature(temp)}</p>
         </article>`;
@@ -62,22 +74,74 @@ const loadHourlyForecast = (hourlyForecast) => {
   hourlyContainer.innerHTML = innerHTMLString;
 };
 
-const loadFeelsLike=({main:{feels_like}})=>{
-  let container=document.querySelector("#feels-like");
-  container.querySelector(".feels-like-temp").textContent=formatTemperature(feels_like)
-}
+const calculateFiveDayForecast = (hourlyForecast) => {
+  let dayWiseForecast = new Map();
+  for (let forecast of hourlyForecast) {
+    const [date] = forecast.dt_txt.split(" ");
+    const daysofWeek = DAYS_OF_WEEK[new Date(date).getDay()];
+    console.log(daysofWeek);
+    if (dayWiseForecast.has(daysofWeek)) {
+      let forecastForTheDay = dayWiseForecast.get(daysofWeek);
+      forecastForTheDay.push(forecast);
+      dayWiseForecast.set(daysofWeek, forecastForTheDay);
+    } else {
+      dayWiseForecast.set(daysofWeek, [forecast]);
+    }
+  }
+  console.log(dayWiseForecast);
+  for (let [key, value] of dayWiseForecast) {
+    let temp_min = Math.min(...Array.from(value, (val) => val.temp_min));
+    let temp_max = Math.max(...Array.from(value, (val) => val.temp_max));
 
-const loadHumidity=({main:{humidity}})=>{
-  let container=document.querySelector("#humidity");
-  container.querySelector(".humidity_feel").textContent=`${humidity}%`;
-}
+    dayWiseForecast.set(key, {
+      temp_min,
+      temp_max,
+      icon: value.find((v) => v.icon).icon,
+    });
+  }
+  console.log(dayWiseForecast);
+  return dayWiseForecast;
+};
+
+const loadfiveDayForecast = (hourlyForecast) => {
+  console.log(hourlyForecast);
+  const dayWiseForecast = calculateFiveDayForecast(hourlyForecast);
+  const container = document.querySelector(".five_day_foreacst_container");
+  let dayWiseInfo = " ";
+  Array.from(dayWiseForecast).map(
+    ([day, { temp_max, temp_min, icon }], index) => {
+
+      if(index <5){
+      dayWiseInfo += `<article class="day_wise_forecast">
+          <h3>${index === 0 ? "today" : day}</h3>
+          <img class="icon" src=${createIconUrl(icon)} alt="icon">
+          <p class="min-temp">${temp_min}</p>
+          <p class="max-temp">${temp_max}</p>
+        </article>`;
+    }
+  }
+  )
+  container.innerHTML=dayWiseInfo;
+};
+
+const loadFeelsLike = ({ main: { feels_like } }) => {
+  let container = document.querySelector("#feels-like");
+  container.querySelector(".feels-like-temp").textContent =
+    formatTemperature(feels_like);
+};
+
+const loadHumidity = ({ main: { humidity } }) => {
+  let container = document.querySelector("#humidity");
+  container.querySelector(".humidity_feel").textContent = `${humidity}%`;
+};
 
 document.addEventListener("DOMContentLoaded", async () => {
   const currentWeather = await getCurrentWeatherData();
   loadCurrentForecast(currentWeather);
 
   const hourlyForecast = await getHourlyForecast(currentWeather);
-  loadHourlyForecast(hourlyForecast);
+  loadHourlyForecast(currentWeather,hourlyForecast);
+  loadfiveDayForecast(hourlyForecast);
   loadFeelsLike(currentWeather);
   loadHumidity(currentWeather);
 });
