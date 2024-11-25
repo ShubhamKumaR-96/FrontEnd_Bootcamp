@@ -102,6 +102,9 @@ p {
   text-align: center;
 }
 
+#search{
+  /* grid-area: row; */
+}
 #fiveday-forecast .five_day_foreacst_container{
   display: grid;
   grid-auto-flow: row;

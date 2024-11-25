@@ -11,6 +11,11 @@ const getCurrentWeatherData = async () => {
   return response.json();
 };
 
+const getCitiesGeoLocations=async(searchText)=>{
+  const response=  await fetch(`http://api.openweathermap.org/geo/1.0/direct?q=${searchText}&limits=5&appid=${API_KEY}`)
+     return response.json();
+ }
+
 const getHourlyForecast = async ({ name: city }) => {
   const response = await fetch(
     `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${API_KEY}&units=metric`
@@ -54,7 +59,8 @@ const loadHourlyForecast = ({main:{temp:tempNow},weather:[{icon:iconNow}]},hourl
   const timeForMatter=Intl.DateTimeFormat("en",{
     hour12:true,hour:"numeric"
   })
-
+ 
+ 
 
   let dataFor12Hours = hourlyForecast.slice(2, 14);
   const hourlyContainer = document.querySelector(".hourly-container");
@@ -135,7 +141,42 @@ const loadHumidity = ({ main: { humidity } }) => {
   container.querySelector(".humidity_feel").textContent = `${humidity}%`;
 };
 
+function debounce(func){
+  let timer;
+  return (...args)=>{
+    // clearTimeout(timer);
+
+    timer=>setTimeout(() => {
+      func.apply(this,args)
+    }, (timeout,500));
+
+
+  }
+}
+
+const onSearchChange=(event)=>{
+    let {value}=event.target;
+    getCitiesGeoLocations(value);
+}
+
+const debounceSearch = (event) => {
+  let { value } = event.target;
+
+  // Call onSearchChange immediately for the first keystroke
+  onSearchChange(event);
+
+  // Apply debounce logic for subsequent keystrokes
+  clearTimeout(timer);
+  timer = setTimeout(() => {
+    onSearchChange(event);
+  }, 500);
+};
+
 document.addEventListener("DOMContentLoaded", async () => {
+
+ const searchInput= document.querySelector("#search");
+ searchInput.addEventListener("input",debounceSearch);
+
   const currentWeather = await getCurrentWeatherData();
   loadCurrentForecast(currentWeather);
 
