@@ -1,11 +1,12 @@
 import React from 'react'
 import './App.css'
 import Card from './components/cards/Card'
+import Grid from './components/Grid/Grid'
 
 const App = () => {
   return (
     <div>
-      <Card player="X" />
+     <Grid numberofCards={9} />
     </div>
   )
 }
