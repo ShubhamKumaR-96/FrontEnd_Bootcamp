@@ -1,3 +1,46 @@
-.pokemonList-wrapper{
-    margin: 2rem auto;
-}
+/* Pokemon List Wrapper */
+.pokemonList-wrapper {
+    text-align: center;
+    min-height: 50vh;
+    border-radius: 5%;
+  }
+  
+  /* Heading Styles */
+  /* .pokemonList-wrapper h1 {
+    font-weight: bold;
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+  } */
+  
+  /* Loading Text Animation */
+  .loading-text {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #fff;
+    background: #ff6f61;
+    padding: 10px 20px;
+    border-radius: 8px;
+    display: inline-block;
+    animation: pulse 1.5s infinite;
+  }
+  
+  /* Pulsing animation for loading text */
+  @keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.1); opacity: 0.8; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  
+  /* Pokemon List Grid */
+  .pokemon-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    justify-content: center;
+    align-items: center;
+    max-width: 80vw;
+    margin: auto;
+  }
+  
+  /* Pokemon Card */
+ 
+  
